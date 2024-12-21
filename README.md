@@ -1,6 +1,3 @@
-Here's a comprehensive README.md for your project:
-
-```markdown
 # FA2EN - Persian to English Text Converter 🔄
 
 [![Bash Script](https://img.shields.io/badge/language-bash-green.svg)](https://www.gnu.org/software/bash/)
@@ -44,14 +41,6 @@ sudo ln -s "$(pwd)/fa2en.sh" /usr/local/bin/fa2en
 ## 🎮 Usage
 
 ### Command Line Interface
-Bash Script (fa2en.sh)
-
-    Convert text: Automatically convert text using the specified mapping.
-    Edit configuration: Open and modify the mapping file in your preferred editor.
-    Validate configuration: Ensure the config file format is correct.
-    Test mapping: Quickly test the mapping in the terminal.
-    Interactive mode: Continuously input and convert text until exited.
-    Backup configuration: Create a timestamped backup of the mapping file.
     
 ```bash
 # Basic text conversion
@@ -60,16 +49,16 @@ fa2en "Your text here"
 # Interactive mode
 fa2en -i
 
-# Edit configuration
+# Edit configuration: Open and modify the mapping file in your preferred editor.
 fa2en -c
 
-# Test mapping
+# Test mapping: Quickly test the mapping in the terminal.
 fa2en -t
 
-# Validate configuration
+# Validate configuration: Ensure the config file format is correct.
 fa2en -v
 
-# Backup configuration
+#Backup configuration: Create a timestamped backup of the mapping file.
 fa2en -b
 ```
 
@@ -78,11 +67,11 @@ fa2en -b
 ```bash
 python3 config_gui.py
 ```
-Python GUI (mapping_app.py)
+Edit and save keyboard mappings visually. 
 
-    Edit and save keyboard mappings visually.
-    Reset mappings to default values.
-    Save and load mappings from configuration files.
+Reset mappings to default values.
+
+Save and load mappings from configuration files.
 
 
     
@@ -154,10 +143,9 @@ echo "$result"
 - Contributors and maintainers
 - PyQt5 team
 - Open source community
-
+- LLM
 ---
 
 <p align="center">
   Made with ❤️ by MG
 </p>
-```
