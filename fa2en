@@ -1,0 +1,135 @@
+#!/bin/bash
+
+CONFIG_FILE="$HOME/.fa2en_config"
+DEFAULT_MAPPING="ض:q|ص:w|ث:e|ق:r|ف:t|غ:y|ع:u|ه:i|خ:o|ح:p|ج:[|چ:]|پ:\\|ش:a|س:s|ی:d|ب:f|ل:g|ا:h|ت:j|ن:k|م:l|ک:;|گ:'|ظ:z|ط:x|ز:c|ر:v|ذ:b|د:n|ئ:m|و:,"
+
+# Colors for better output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+NC='\033[0m' # No Color
+
+show_help() {
+    echo "Usage:"
+    echo " fa2en [OPTIONS] [TEXT]"
+    echo "Options:"
+    echo " -h, --help     Show help"
+    echo " -c, --config   Edit keyboard mapping"
+    echo " -t, --test     Test mapping"
+    echo " -v, --validate Validate config file"
+    echo " -b, --backup   Backup config file"
+}
+
+error_exit() {
+    echo -e "${RED}Error: $1${NC}" >&2
+    exit 1
+}
+
+success_message() {
+    echo -e "${GREEN}$1${NC}"
+}
+
+validate_config() {
+    local config_content
+    config_content=$(cat "$CONFIG_FILE") || error_exit "Cannot read config file"
+    
+    if ! echo "$config_content" | grep -E '^([^:]+:[^:]+|)*[^:]+:[^:]+$' >/dev/null; then
+        error_exit "Invalid config file format"
+    fi
+    success_message "Config file is valid"
+}
+
+backup_config() {
+    local backup_file="$CONFIG_FILE.backup.$(date +%Y%m%d_%H%M%S)"
+    cp "$CONFIG_FILE" "$backup_file" || error_exit "Failed to create backup"
+    success_message "Backup saved to $backup_file"
+}
+
+ensure_config() {
+    if [ ! -f "$CONFIG_FILE" ]; then
+        echo "$DEFAULT_MAPPING" > "$CONFIG_FILE"
+        success_message "Default mapping saved to $CONFIG_FILE"
+    fi
+}
+
+read_mapping() {
+    declare -A mapping
+    while IFS=: read -r fa en; do
+        # Ignore empty lines
+        [[ -z "$fa" || -z "$en" ]] && continue
+        mapping["$fa"]="$en"
+        mapping["$en"]="$fa"  # Reverse mapping
+    done < <(echo "$DEFAULT_MAPPING" | tr '|' '\n')
+    echo "$(declare -p mapping)"
+}
+
+convert_text() {
+    local text="$1"
+    eval "$(read_mapping)"
+    local converted=""
+    for ((i=0; i<${#text}; i++)); do
+        char="${text:i:1}"
+        if [[ -n "${mapping[$char]}" ]]; then
+            converted+="${mapping[$char]}"
+        else
+            converted+="$char"
+        fi
+    done
+    echo "$converted"
+}
+
+edit_config() {
+    ensure_config
+    if command -v "${EDITOR:-vi}" >/dev/null 2>&1; then
+        ${EDITOR:-vi} "$CONFIG_FILE"
+    else
+        echo "Please install an editor or set EDITOR variable"
+        exit 1
+    fi
+}
+
+test_mapping() {
+    ensure_config
+    echo "Enter text to test:"
+    read -r test_text
+    echo "Converted:"
+    convert_text "$test_text"
+}
+
+interactive_mode() {
+    echo "Interactive mode (Press Ctrl+C to exit)"
+    while true; do
+        echo -n "Enter text: "
+        read -r text || break
+        [ -z "$text" ] && continue
+        echo "Result: $(convert_text "$text")"
+    done
+}
+
+case "$1" in
+    -h|--help)
+        show_help
+        ;;
+    -c|--config)
+        edit_config
+        ;;
+    -t|--test)
+        test_mapping
+        ;;
+    -v|--validate)
+        validate_config
+        ;;
+    -b|--backup)
+        backup_config
+        ;;
+    -i|--interactive)
+        interactive_mode
+        ;;
+    "")
+        echo "Please provide text to convert or use --help"
+        ;;
+    *)
+        ensure_config
+        # Handle all arguments as a single text
+        convert_text "$*"
+        ;;
+esac
